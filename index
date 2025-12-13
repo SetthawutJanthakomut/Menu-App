@@ -1272,26 +1272,42 @@ select:focus {
         <h2 id="modalTitle">✨ เพิ่มระบบงานใหม่</h2>
         <p id="modalDesc">กรอกข้อมูลระบบงานที่ต้องการเพิ่ม</p>
       </div>
+
       <form id="addForm">
-        <input type="hidden" id="editMode" value="false">
-        <input type="hidden" id="oldAppName" value="">
-        <div class="form-group">
-          <label>ชื่อระบบงาน</label>
-          <input type="text" id="appName" required placeholder="เช่น Survey Work System">
-        </div>
-        <div class="form-group">
-          <label>URL ของระบบ</label>
-          <input type="url" id="appUrl" required placeholder="https://...">
-        </div>
-        <div class="form-group">
-          <label>URL รูปภาพ (ไอคอน)</label>
-          <input type="url" id="appPhoto" required placeholder="https://...">
-        </div>
-        <div class="modal-buttons">
-          <button type="button" class="btn btn-cancel" onclick="closeModal()">ยกเลิก</button>
-          <button type="submit" class="btn btn-submit" id="submitBtn">เพิ่มระบบงาน</button>
-        </div>
-      </form>
+  <input type="hidden" id="editMode" value="false">
+  <input type="hidden" id="oldAppName" value="">
+  
+  <div class="form-group">
+    <label>ชื่อระบบงาน</label>
+    <input type="text" id="appName" required placeholder="เช่น Survey Work System">
+  </div>
+  
+  <div class="form-group">
+    <label>URL ของระบบ</label>
+    <input type="url" id="appUrl" required placeholder="https://...">
+  </div>
+  
+  <div class="form-group">
+    <label>URL รูปภาพ (ไอคอน)</label>
+    <input type="url" id="appPhoto" required placeholder="https://...">
+  </div>
+
+  <div class="form-group">
+    <div style="display: flex; align-items: center; gap: 10px; background: #f0f7ff; padding: 10px; border-radius: 8px; border: 1px solid #cce5ff;">
+      <input type="checkbox" id="appPublic" style="width: 20px; height: 20px; margin: 0; cursor: pointer;">
+      <label for="appPublic" style="margin: 0; cursor: pointer; color: #1565c0; font-weight: 500;">
+        🌍 เปิดให้ทุกคนเข้าถึงได้ (Public App)
+      </label>
+    </div>
+    <small style="color: #666; display: block; margin-top: 5px; margin-left: 10px; font-size: 12px;">
+      * หากติ๊กเลือก ผู้ใช้ทุกคนจะเห็นและเข้าใช้งานแอปนี้ได้ทันทีโดยไม่ต้องขอสิทธิ์
+    </small>
+  </div>
+  <div class="modal-buttons">
+    <button type="button" class="btn btn-cancel" onclick="closeModal()">ยกเลิก</button>
+    <button type="submit" class="btn btn-submit" id="submitBtn">เพิ่มระบบงาน</button>
+  </div>
+</form>
     </div>
   </div>
   
@@ -2021,104 +2037,108 @@ function deleteReportItem(rowIndex) {
         return;
       }
       
-      let html = '<div class="apps-grid">';
-      
-      apps.forEach(function(app, index) {
-        html += `
-          <div class="app-card" onclick="openApp('${app.url}')" style="animation-delay: ${index * 0.1}s">
-            <img src="${app.photo}" alt="${app.name}" class="app-icon" onerror="this.src='https://via.placeholder.com/80/667eea/FFFFFF?text=${app.name.charAt(0)}'">
-            <div class="app-name">${app.name}</div>
-            <div class="app-owner">
-              <span>👤</span>
-              <span>${app.owner}</span>
-            </div>
-            ${isAdmin ? `
-              <div class="app-actions">
-                <button class="btn-edit" onclick="editApp(event, '${app.name}', '${app.url}', '${app.photo}')" title="แก้ไข">✏️</button>
-                <button class="btn-delete" onclick="deleteApp(event, '${app.name}')" title="ลบ">🗑️</button>
-              </div>
-            ` : ''}
+let html = '<div class="apps-grid">';
+  apps.forEach(function(app, index) {
+    // สร้างป้าย Public badge
+    const publicBadge = app.isPublic ? 
+      '<span style="background:#10b981; color:white; font-size:10px; padding:2px 6px; border-radius:4px; margin-left:5px;">Public</span>' : '';
+
+    html += `
+      <div class="app-card" onclick="openApp('${app.url}')" style="animation-delay: ${index * 0.1}s">
+        <img src="${app.photo}" alt="${app.name}" class="app-icon" onerror="this.src='https://via.placeholder.com/80/667eea/FFFFFF?text=${app.name.charAt(0)}'">
+        <div class="app-name">
+          ${app.name}
+          ${publicBadge} </div>
+        <div class="app-owner">
+          <span>👤</span>
+          <span>${app.owner}</span>
+        </div>
+        ${isAdmin ? `
+          <div class="app-actions">
+            <button class="btn-edit" onclick="editApp(event, '${app.name}', '${app.url}', '${app.photo}', ${!!app.isPublic})" title="แก้ไข">✏️</button>
+            <button class="btn-delete" onclick="deleteApp(event, '${app.name}')" title="ลบ">🗑️</button>
           </div>
-        `;
-      });
-      
-      html += '</div>';
-      container.innerHTML = html;
-    }
+        ` : ''}
+      </div>
+    `;
+  });
+  html += '</div>';
+  container.innerHTML = html;
+}
     
     function openApp(url) {
       window.open(url, '_blank');
     }
     
-    function openModal() {
-      document.getElementById('modalTitle').textContent = '✨ เพิ่มระบบงานใหม่';
-      document.getElementById('modalDesc').textContent = 'กรอกข้อมูลระบบงานที่ต้องการเพิ่ม';
-      document.getElementById('submitBtn').textContent = 'เพิ่มระบบงาน';
-      document.getElementById('editMode').value = 'false';
-      document.getElementById('addForm').reset();
-      document.getElementById('addModal').classList.add('show');
-    }
+function openModal() {
+  document.getElementById('modalTitle').textContent = '✨ เพิ่มระบบงานใหม่';
+  document.getElementById('modalDesc').textContent = 'กรอกข้อมูลระบบงานที่ต้องการเพิ่ม';
+  document.getElementById('submitBtn').textContent = 'เพิ่มระบบงาน';
+  document.getElementById('editMode').value = 'false';
+  document.getElementById('addForm').reset();
+  document.getElementById('appPublic').checked = false; // 🔥 รีเซ็ต Checkbox
+  document.getElementById('addModal').classList.add('show');
+}
     
     function closeModal() {
       document.getElementById('addModal').classList.remove('show');
       document.getElementById('addForm').reset();
     }
     
-    function editApp(event, name, url, photo) {
-      event.stopPropagation();
-      
-      document.getElementById('modalTitle').textContent = '✏️ แก้ไขระบบงาน';
-      document.getElementById('modalDesc').textContent = 'แก้ไขข้อมูลระบบงาน';
-      document.getElementById('submitBtn').textContent = 'บันทึกการแก้ไข';
-      document.getElementById('editMode').value = 'true';
-      document.getElementById('oldAppName').value = name;
-      document.getElementById('appName').value = name;
-      document.getElementById('appUrl').value = url;
-      document.getElementById('appPhoto').value = photo;
-      document.getElementById('addModal').classList.add('show');
-    }
+function editApp(event, name, url, photo, isPublic) {
+  event.stopPropagation();
+  document.getElementById('modalTitle').textContent = '✏️ แก้ไขระบบงาน';
+  document.getElementById('modalDesc').textContent = 'แก้ไขข้อมูลระบบงาน';
+  document.getElementById('submitBtn').textContent = 'บันทึกการแก้ไข';
+  document.getElementById('editMode').value = 'true';
+  document.getElementById('oldAppName').value = name;
+  document.getElementById('appName').value = name;
+  document.getElementById('appUrl').value = url;
+  document.getElementById('appPhoto').value = photo;
+  document.getElementById('appPublic').checked = isPublic; // 🔥 ตั้งค่า Checkbox ตามข้อมูลเดิม
+  document.getElementById('addModal').classList.add('show');
+}
     
-    document.getElementById('addForm').addEventListener('submit', function(e) {
-      e.preventDefault();
-      
-      const name = document.getElementById('appName').value;
-      const url = document.getElementById('appUrl').value;
-      const photo = document.getElementById('appPhoto').value;
-      const isEdit = document.getElementById('editMode').value === 'true';
-      const oldName = document.getElementById('oldAppName').value;
-      
-      if (isEdit) {
-        google.script.run
-          .withSuccessHandler(function(result) {
-            if (result.success) {
-              showMessage('แก้ไขระบบงานสำเร็จ! ✅', 'success');
-              closeModal();
-              loadApps();
-            } else {
-              showMessage(result.message || 'เกิดข้อผิดพลาด', 'error');
-            }
-          })
-          .withFailureHandler(function(error) {
-            showMessage('เกิดข้อผิดพลาด: ' + error, 'error');
-          })
-          .updateApp(oldName, name, url, photo);
-      } else {
-        google.script.run
-          .withSuccessHandler(function(result) {
-            if (result.success) {
-              showMessage('เพิ่มระบบงานสำเร็จ! 🎉', 'success');
-              closeModal();
-              loadApps();
-            } else {
-              showMessage(result.message || 'เกิดข้อผิดพลาด', 'error');
-            }
-          })
-          .withFailureHandler(function(error) {
-            showMessage('เกิดข้อผิดพลาด: ' + error, 'error');
-          })
-          .addApp(name, url, photo);
-      }
-    });
+document.getElementById('addForm').addEventListener('submit', function(e) {
+  e.preventDefault();
+  
+  const name = document.getElementById('appName').value;
+  const url = document.getElementById('appUrl').value;
+  const photo = document.getElementById('appPhoto').value;
+  const isPublic = document.getElementById('appPublic').checked; // 🔥 รับค่า Checkbox
+  const isEdit = document.getElementById('editMode').value === 'true';
+  const oldName = document.getElementById('oldAppName').value;
+  
+  if (isEdit) {
+    google.script.run
+      .withSuccessHandler(function(result) {
+         // ... (handler เดิม)
+         if (result.success) {
+            showMessage('แก้ไขระบบงานสำเร็จ! ✅', 'success');
+            closeModal();
+            loadApps();
+         } else {
+            showMessage(result.message || 'เกิดข้อผิดพลาด', 'error');
+         }
+      })
+      .withFailureHandler(function(error) { showMessage('เกิดข้อผิดพลาด: ' + error, 'error'); })
+      .updateApp(oldName, name, url, photo, isPublic); // 🔥 ส่ง isPublic
+  } else {
+    google.script.run
+      .withSuccessHandler(function(result) {
+         // ... (handler เดิม)
+         if (result.success) {
+            showMessage('เพิ่มระบบงานสำเร็จ! 🎉', 'success');
+            closeModal();
+            loadApps();
+         } else {
+            showMessage(result.message || 'เกิดข้อผิดพลาด', 'error');
+         }
+      })
+      .withFailureHandler(function(error) { showMessage('เกิดข้อผิดพลาด: ' + error, 'error'); })
+      .addApp(name, url, photo, isPublic); // 🔥 ส่ง isPublic
+  }
+});
     
     function deleteApp(event, name) {
       event.stopPropagation();
